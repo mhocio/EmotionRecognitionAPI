@@ -26,7 +26,6 @@ class PredictionsView(APIView):
 
     def post(self, request):
         uploaded_file = request.FILES['myfile']
-        print(uploaded_file)
         test_img = image.img_to_array(image.load_img(uploaded_file))
         test_img = np.array(test_img, dtype='uint8')
 
