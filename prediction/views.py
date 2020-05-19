@@ -1,25 +1,15 @@
-import os
-import pathlib
-
 import cv2
-import matplotlib
+import numpy as np
 from PIL import Image
 from django.http import HttpResponse
-
-from django.shortcuts import render
 from imageio import imsave
 from keras.preprocessing import image
-import numpy as np
-import tensorflow as tf
 from rest_framework.decorators import parser_classes
 from rest_framework.parsers import MultiPartParser
-from rest_framework.views import APIView
 from tensorflow_core.python.keras.models import model_from_json
 
 global graph, model
 
-from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.views import APIView
 
 # initializing the graph
