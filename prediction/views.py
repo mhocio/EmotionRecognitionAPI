@@ -107,7 +107,7 @@ class PredictionsView(APIView):
         #        im = np.fromstring(m, np.uint8)
         gray_img = cv2.cvtColor(test_img, cv2.COLOR_BGR2GRAY)
         face_haar_cascade = cv2.CascadeClassifier(
-            '/Users/jorginaarrescardona/PycharmProjects/deployML/prediction/haarcascade_frontalface_default.xml')
+            'prediction/haarcascade_frontalface_default.xml')
         faces_detected = face_haar_cascade.detectMultiScale(gray_img, 1.32, 5)
 
         for (x, y, w, h) in faces_detected:
