@@ -6,3 +6,5 @@
 /spec
 .idea
 *.sqlite3
+templates
+README.md
