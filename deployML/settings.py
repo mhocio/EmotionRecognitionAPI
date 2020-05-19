@@ -93,7 +93,7 @@ else:
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'emotionrecognition',
             'USER': 'emotionrecognitionuser',
-            'PASSWORD': '1emotion2recognitio3',
+            'PASSWORD': '1emotion2recognition3',
             'HOST': 'localhost',
             'PORT': '',
         }
