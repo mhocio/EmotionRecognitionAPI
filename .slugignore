@@ -1,6 +1,8 @@
-# Heres a comment
-*.psd
-*.pdf
+deployML
+**/*.pyc
+**/__pycache__
+media
+static
 *.png
 /test
 /spec
