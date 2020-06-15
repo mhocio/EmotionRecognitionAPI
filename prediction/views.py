@@ -25,8 +25,7 @@ model = model_from_json(open("AIModelv1.json", "r").read())
 model.load_weights('AIModelv1.h5')
 
 # loading our trained model for dogs
-with open('dogs_recognition_model.pkl', 'rb') as file:
-    model_dogs = pickle.load(file)
+model_dogs = load_learner('dogs_recognition_model')
     
 # loading our trained model for signs
 defaults.device = torch.device('cpu')
@@ -47,20 +46,19 @@ class DogView(APIView):
     
     def post(self, request):
         uploaded_file = request.FILES['myfile']
-        test_img = image.img_to_array(image.load_img(uploaded_file))
-        test_img = np.array(test_img, dtype='uint8')
+        image_to_classify = open_image(uploaded_file)
+        pred_class,pred_idx,outputs = model_dogs.predict(image_to_classify)
         
-        print(model_dogs)
-        print(type(model_dogs))
-        print(dir(model_dogs))
-        print(id(model_dogs))
-        return HttpResponse(model_dogs)
-    
+        print(pred_class,pred_idx,outputs)
+        #print(model_dogs)
+        #print(type(model_dogs))
+        #print(dir(model_dogs))
+        #print(id(model_dogs))
+        return HttpResponse(pred_class)
+
 
 @parser_classes((MultiPartParser,))
 class SignsView(APIView):
-    def get(self, request):
-        return HttpResponse("KUPDA")
     
     def post(self, request):
         uploaded_file = request.FILES['myfile']
