@@ -1,12 +1,16 @@
+
+from fastai.vision import *
 import cv2
 import numpy as np
+import pickle
 from PIL import Image
 from django.http import HttpResponse
 from imageio import imsave
 from keras.preprocessing import image
 from rest_framework.decorators import parser_classes
 from rest_framework.parsers import MultiPartParser
-from tensorflow_core.python.keras.models import model_from_json
+from tensorflow.keras.models import model_from_json
+# import fastai.vision
 
 global model
 
@@ -14,11 +18,57 @@ from rest_framework.views import APIView
 
 # initializing the graph
 
-# loading our trained model
+# loading our trained model for emotions
 # load model
 model = model_from_json(open("AIModelv1.json", "r").read())
 # load weights
 model.load_weights('AIModelv1.h5')
+
+# loading our trained model for dogs
+with open('dogs_recognition_model.pkl', 'rb') as file:
+    model_dogs = pickle.load(file)
+    
+# loading our trained model for signs
+defaults.device = torch.device('cpu')
+model_signs = load_learner('signs_recognition_model')
+signs_list = [
+            "Warning", "Priority crossroad", "?", "Junction with a minor road", "Curve left", "Curve right",
+            "Double curve (first left)",  "Double curve (first right)", "Road narrows", "Slippery road",
+            "Cyclists ahead", "Children", "Animals crossing", "Soft verges", "Yield", "Stop", "Priority road",
+            "30 km/h", "40 km/h", "50 km/h", "60 km/h", "70 km/h", "No overtaking", "?",
+            "Bike road", "Bikes and pedestrians road", "Keep right", "Overtaking allowed", "Crosswalk", "Parking",
+            "Bus stop"]
+
+
+@parser_classes((MultiPartParser,))
+class DogView(APIView):
+    def get(self, request):
+        return HttpResponse("working...")
+    
+    def post(self, request):
+        uploaded_file = request.FILES['myfile']
+        test_img = image.img_to_array(image.load_img(uploaded_file))
+        test_img = np.array(test_img, dtype='uint8')
+        
+        print(model_dogs)
+        print(type(model_dogs))
+        print(dir(model_dogs))
+        print(id(model_dogs))
+        return HttpResponse(model_dogs)
+    
+
+@parser_classes((MultiPartParser,))
+class SignsView(APIView):
+    def get(self, request):
+        return HttpResponse("KUPDA")
+    
+    def post(self, request):
+        uploaded_file = request.FILES['myfile']
+        image_to_classify = open_image(uploaded_file)
+        pred_class,pred_idx,outputs = model_signs.predict(image_to_classify)
+        # print(signs_list[int(pred_class)])
+        # print(pred_class,pred_idx,outputs)
+        return HttpResponse(signs_list[int(pred_class)])
 
 
 @parser_classes((MultiPartParser,))
