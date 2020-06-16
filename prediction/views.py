@@ -10,6 +10,7 @@ from keras.preprocessing import image
 from rest_framework.decorators import parser_classes
 from rest_framework.parsers import MultiPartParser
 from tensorflow.keras.models import model_from_json
+from tensorflow import reshape
 # import fastai.vision
 
 global model
@@ -23,6 +24,10 @@ from rest_framework.views import APIView
 model = model_from_json(open("AIModelv1.json", "r").read())
 # load weights
 model.load_weights('AIModelv1.h5')
+
+# loading our trained model for flowers
+model_flowers = model_from_json(open("flowers_recognition_model/model.json", "r").read())
+model_flowers.load_weights('flowers_recognition_model/model.h5')
 
 # loading our trained model for dogs
 model_dogs = load_learner('dogs_recognition_model')
@@ -49,12 +54,8 @@ class DogView(APIView):
         image_to_classify = open_image(uploaded_file)
         pred_class,pred_idx,outputs = model_dogs.predict(image_to_classify)
         
-        print(pred_class,pred_idx,outputs)
-        #print(model_dogs)
-        #print(type(model_dogs))
-        #print(dir(model_dogs))
-        #print(id(model_dogs))
-        return HttpResponse(pred_class)
+        response = str(pred_class).split('-')[1].replace('_', ' ')
+        return HttpResponse(response)
 
 
 @parser_classes((MultiPartParser,))
@@ -64,10 +65,30 @@ class SignsView(APIView):
         uploaded_file = request.FILES['myfile']
         image_to_classify = open_image(uploaded_file)
         pred_class,pred_idx,outputs = model_signs.predict(image_to_classify)
-        # print(signs_list[int(pred_class)])
-        # print(pred_class,pred_idx,outputs)
+
         return HttpResponse(signs_list[int(pred_class)])
 
+
+@parser_classes((MultiPartParser,))
+class FlowersView(APIView):
+    # model_flowers
+    def post(self, request):
+        uploaded_file = request.FILES['myfile']
+        tstImg2 = np.round(np.array(image.load_img(uploaded_file), dtype=np.float32))
+        tstImg2 = cv2.resize(tstImg2, (150, 150))
+        
+        X = []
+        X.append(np.array(tstImg2))
+        X = np.array(X)
+        X = X/255
+        
+        pred = model_flowers.predict(X)
+        
+        max_index = np.argmax(pred[0])
+        flowers = ['daisy', 'dandelion', 'rose', 'sunflower', 'tulip']
+        predicted_flower = flowers[max_index]
+        
+        return HttpResponse(predicted_flower)
 
 @parser_classes((MultiPartParser,))
 class PredictionsView(APIView):
@@ -93,14 +114,14 @@ class PredictionsView(APIView):
             # uncoment if expected predict are normalized pixels
 
             predictions = model.predict(img_pixels)
-
+            
             # find max indexed array
             max_index = np.argmax(predictions[0])
 
             emotions = ('angry', 'disgust', 'fear', 'happy', 'sad', 'surprise', 'neutral')
             predicted_emotion = emotions[max_index]
 
-            cv2.putText(test_img, predicted_emotion, (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 2)
+            cv2.putText(test_img, predicted_emotion, (int(x), int(y+h)), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2)
 
         new_image = Image.fromarray(test_img)
         imsave('images/File_name.png', new_image)
